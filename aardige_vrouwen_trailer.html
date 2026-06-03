@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Aardige Vrouwen — Megan van Kessel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{ --red:#E8300A; }
+  html,body{height:100%;overflow:hidden;background:var(--red);}
+  body{
+    font-family:'Playfair Display',Georgia,serif;
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* horizontal track */
+  #track{
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:row;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    cursor:default;
+  }
+  #track::-webkit-scrollbar{display:none;}
+
+  .panel{
+    flex:0 0 100vw;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    scroll-snap-align:center;
+    scroll-snap-stop:always;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:7vh 8vw;
+    position:relative;
+  }
+
+  /* quote panels */
+  .quote{
+    max-width:760px;
+    text-align:center;
+    font-style:italic;
+    line-height:1.18;
+    font-weight:900;
+    letter-spacing:-0.01em;
+  }
+  .quote .w{
+    display:inline-block;
+    opacity:0;
+    transform:translateY(18px);
+    filter:blur(6px);
+    transition:opacity .55s cubic-bezier(.2,.7,.2,1),
+               transform .55s cubic-bezier(.2,.7,.2,1),
+               filter .55s cubic-bezier(.2,.7,.2,1);
+    white-space:pre;
+  }
+  .quote .w.on{
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+  }
+
+  .quote.xs { font-size:clamp(21px,3.4vw,32px); font-weight:700; line-height:1.32; }
+  .quote.sm { font-size:clamp(24px,4.2vw,40px); font-weight:700; line-height:1.26; }
+  .quote.md { font-size:clamp(29px,5.2vw,50px); font-weight:900; line-height:1.2; }
+  .quote.lg { font-size:clamp(38px,6.6vw,66px); font-weight:900; line-height:1.12; }
+  .quote.xl { font-size:clamp(48px,8vw,86px); font-weight:900; line-height:1.06; }
+  .quote.xxl{ font-size:clamp(54px,9vw,104px); font-weight:900; line-height:1.02; }
+
+  /* tiny quote index under each quote */
+  .idx{
+    position:absolute;
+    bottom:7vh;
+    left:0;right:0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.4em;
+    text-transform:uppercase;
+    font-style:normal;
+    font-weight:400;
+    color:rgba(255,255,255,.45);
+    opacity:0;
+    transition:opacity .8s ease .25s;
+  }
+  .panel.active .idx{opacity:1;}
+
+  /* title bookend panels */
+  .author-top{
+    font-size:clamp(11px,1.4vw,13px);
+    letter-spacing:.45em;
+    text-transform:uppercase;
+    color:#fff;
+    margin-bottom:3.5vh;
+    font-weight:400;
+    text-align:center;
+  }
+  .mega{
+    font-weight:900;
+    font-style:italic;
+    color:#fff;
+    line-height:.86;
+    text-align:center;
+    font-size:clamp(84px,22vw,260px);
+    letter-spacing:-0.02em;
+  }
+  .publisher{
+    font-size:clamp(10px,1.3vw,12px);
+    letter-spacing:.4em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.6);
+    margin-top:4vh;
+    text-align:center;
+  }
+  .title-panel .author-top,
+  .title-panel .mega,
+  .title-panel .publisher,
+  .title-panel .scroll-hint{
+    opacity:0;
+    transform:translateY(22px);
+    filter:blur(8px);
+    transition:opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1), filter 1s cubic-bezier(.2,.7,.2,1);
+  }
+  .title-panel.active .author-top{opacity:1;transform:none;filter:none;transition-delay:.1s;}
+  .title-panel.active .mega{opacity:1;transform:none;filter:none;transition-delay:.35s;}
+  .title-panel.active .publisher{opacity:1;transform:none;filter:none;transition-delay:.6s;}
+  .title-panel.active .scroll-hint{opacity:1;transform:none;filter:none;transition-delay:.9s;}
+
+  .scroll-hint{
+    position:absolute;
+    bottom:6vh;left:0;right:0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    font-style:normal;
+    font-weight:400;
+    color:rgba(255,255,255,.7);
+  }
+  .scroll-hint .arrow{
+    display:block;
+    margin:1.1rem auto 0;
+    width:22px;height:22px;
+    border-right:2px solid rgba(255,255,255,.7);
+    border-bottom:2px solid rgba(255,255,255,.7);
+    transform:rotate(-45deg);
+    animation:nudge 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge{
+    0%,100%{transform:rotate(-45deg) translate(0,0);opacity:.4;}
+    50%{transform:rotate(-45deg) translate(6px,6px);opacity:1;}
+  }
+
+  /* progress bar */
+  #progress{
+    position:fixed;left:0;bottom:0;height:3px;width:0%;
+    background:#fff;z-index:50;
+    transition:width .12s linear;
+  }
+  #counter{
+    position:fixed;top:max(18px,3vh);right:max(18px,3vw);
+    z-index:50;
+    font-size:12px;letter-spacing:.25em;
+    color:rgba(255,255,255,.65);
+    font-variant-numeric:tabular-nums;
+    font-style:normal;font-weight:400;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .quote .w{transition:none !important;}
+    .scroll-hint .arrow{animation:none;}
+  }
+</style>
+</head>
+<body>
+  <div id="counter"></div>
+  <div id="progress"></div>
+  <div id="track"></div>
+
+<script>
+const QUOTES = [{"c": "xs", "t": "\"Puistjes verstopte ik onder een foundation van L'Oréal, op mijn mond smeerde ik elk kwartier lipgloss, het ene oog was groter dan het andere, daar was niks aan te doen.\""}, {"c": "md", "t": "\"Haar wangen waren rood, geen ziekelijk rood – eerder gezond, alsof ze elke ochtend een glas melk dronk.\""}, {"c": "xs", "t": "\"Met dikke tieten en blond haar.\""}, {"c": "sm", "t": "\"Dolores droeg een wollen vest als jas.\""}, {"c": "lg", "t": "\"Cécile had eyeliner op haar oogleden, de onderkant van haar haar was naar buiten geföhnd en ik dacht: dit is nou wat ze met glamour bedoelen.\""}, {"c": "xs", "t": "\"Van dichtbij zag ik dat haar nagels een witte rand hadden, French manicure.\""}, {"c": "sm", "t": "\"Ze droeg een maillot zonder gaten.\""}, {"c": "xs", "t": "\"'Mooie laarzen,' zei ik na een week.\""}, {"c": "md", "t": "\"Ze droeg een strak gestreept shirt. Haar borstkas was plat.\""}, {"c": "xs", "t": "\"Ik vond haar mooi, vooral haar haar.\""}, {"c": "sm", "t": "\"Ik draaide de dop van mijn lipgloss en bracht nog een laag aan.\""}, {"c": "xs", "t": "\"Met een stijltang hielden ze hun haren plat.\""}, {"c": "md", "t": "\"Ik had mijn haar in een knoop of in een vlecht, en droeg een lange jas en de afgedankte cowboylaarzen van mijn zus.\""}, {"c": "xl", "t": "\"Ze heeft een dikke nek.\""}, {"c": "xs", "t": "\"Er zat een huidkleurige kraag rond haar nek, zo'n schuimrubberen band dat haar houding iets stoïcijns gaf.\""}, {"c": "sm", "t": "\"Dolores haalde een zwarte olijf uit haar trommel en kauwde zonder haar gezicht te vertrekken.\""}, {"c": "lg", "t": "\"Op je accent, mascaraklonten, kniehaar, een groen waas op je oorlel, een scheve ondertand of te lange nagel.\""}, {"c": "xs", "t": "\"Van alle meisjes was zij de knapste, met haar reebruine ogen en vriendelijke stem.\""}, {"c": "sm", "t": "\"Haar mond hing een stukje open en het leek alsof ze weer verder ging praten.\""}, {"c": "xs", "t": "\"Lily trok haar smalle lippen naar binnen. Haar ogen werden glazig.\""}, {"c": "md", "t": "\"'Wat een lelijke jurk heeft ze aan zeg.'\""}, {"c": "sm", "t": "\"Een donkere huid, lichte ogen, ranke armen.\""}, {"c": "xs", "t": "\"Die genieten er juist van als jij daar met je uitgroei en je doorlopende wenkbrauw ligt.\""}, {"c": "md", "t": "\"Ze droeg zelfs een kroon op haar hoofd.\""}, {"c": "sm", "t": "\"Ze droeg een tutu over haar spijkerbroek.\""}, {"c": "xs", "t": "\"Ik had mijn donkerste broek aan en een broche in de vorm van een roos op mijn jas gespeld.\""}, {"c": "md", "t": "\"Ze had gezegd dat een paarse broche ook mooi zou zijn omdat dit paste bij mijn paarse handschoenen en als je accessoires in dezelfde kleur droeg, het oog rust kreeg.\""}, {"c": "xs", "t": "\"Ik liep een heel stuk langs de suikerbietenvelden en de appelgaarden in mijn donkere broek die lekker warm was.\""}, {"c": "sm", "t": "\"Dolores knoopte haar sjaal los en er spreidde een geur van wasverzachter.\""}, {"c": "lg", "t": "\"Om half vijf viste Dolores de blauwe baret uit de kast. Ze draaide hem rond haar wijsvinger en zette hem op haar hoofd.\""}, {"c": "xs", "t": "\"Alleen een streep huid met wat kant.\""}, {"c": "md", "t": "\"Er ging iets van haar uit dat bleef hangen, ze rook naar dure parfum en haar schoenenneuzen glansden.\""}, {"c": "xs", "t": "\"Dolores keek naar haar schoenen met een blik op haar gezicht die zowel schaamte als onverschilligheid suggereerde.\""}, {"c": "sm", "t": "\"Haar haren zaten netjes.\""}, {"c": "xs", "t": "\"'Achter die deur kun je je spullen kwijt.' Er zat een klein spatje zeepsop op haar kin.\""}, {"c": "md", "t": "\"Dolores had wel iets weg van Napoleon, dezelfde ronde witte wangen.\""}, {"c": "sm", "t": "\"Ze was gekleed in een herenhemd en een beige broek, haar haren had ze in een staart gebonden, ze was mooi.\""}, {"c": "xs", "t": "\"Ik zag mezelf voorbijkomen in een goud omlijste spiegel, mijn oren leken meer te flappen dan normaal.\""}, {"c": "xl", "t": "\"Mijn moeder droeg een zonnebril met roze glazen en ze danste.\""}, {"c": "xs", "t": "\"Ze stond midden op de dansvloer te zwaaien met haar jurk.\""}, {"c": "sm", "t": "\"Aan haar pols hing een horloge met een roestrood bandje, te protserig voor haar, alsof het haar omlaag trok.\""}, {"c": "xs", "t": "\"Ik keek naar haar onderarmen, naar de fijne rimpels zoals bij olifanten.\""}, {"c": "md", "t": "\"Haar mond hing open, een scheef ondertandje.\""}, {"c": "xs", "t": "\"Het Tl-licht maakte haar gezicht roze met een tikkeltje rood.\""}, {"c": "sm", "t": "\"Ze had kort haar en droeg een glanzend trainingspak, dichtgeritst tot haar kin.\""}, {"c": "xs", "t": "\"Jeanne liep meteen voorop, haar benen maakten perfecte cirkels.\""}, {"c": "md", "t": "\"Haar T-shirt was klam en koud.\""}, {"c": "xs", "t": "\"Enthousiast hield ze een lok rood haar omhoog.\""}, {"c": "sm", "t": "\"Cécile opende een keukenla, pakte een fles parfum, spoot wat op haar polsen en wreef ze tegen elkaar.\""}, {"c": "lg", "t": "\"Haar borsten waren als laatste gekomen en uiteindelijk de grootste.\""}, {"c": "xs", "t": "\"'Ik ben misselijk,' zei Jeanne met gesloten ogen.\""}, {"c": "sm", "t": "\"Jeanne's wang lag geplet tegen de tegels.\""}, {"c": "xs", "t": "\"Jeanne lag met gesloten ogen op de chaise longue.\""}, {"c": "md", "t": "\"Haar badjas viel open, ze droeg een rode bh.\""}, {"c": "xs", "t": "\"Ze kwam tegenover me zitten met een blauw oog.\""}, {"c": "sm", "t": "\"Op haar armen zaten bruine plekken. Haar handen lagen plat op de tafel.\""}, {"c": "lg", "t": "\"We spoten om en om zoveel mogelijk blondspray op ons hoofd.\""}, {"c": "xs", "t": "\"Die ochtend hadden we bij haar zwembad gelegen, maar rond half twaalf was Cécile met een stralend gezicht komen protesteren.\""}, {"c": "sm", "t": "\"Ik moest er bruine kleren dragen.\""}, {"c": "xs", "t": "\"De vrouw van de baas zat elke dag in een gedecolleteerde jurk aan de bar met een gouden pakje sigaretten voor zich.\""}, {"c": "md", "t": "\"'Jeetje,' zei de hoogblonde vrouw achter de bar, 'wat lijk jij op je zus, jullie hebben precies dezelfde stem.'\""}, {"c": "xs", "t": "\"Ze droeg zelfgemaakte kralenoorbellen en haar tanden waren scheef, dat viel me nu pas op.\""}, {"c": "sm", "t": "\"Onze benen in elkaar gestrengeld, lippen stijf op elkaar en alles doen om aan iets anders te denken.\""}, {"c": "xxl", "t": "\"Ik had haar moeten zeggen dat ze niet zo hoefde te doen, dat ze zonder opsmuk mooier was.\""}, {"c": "xs", "t": "\"Ik had niets om kapot te slaan, mijn kleren zaten in een plastic zak, en ik droeg een donkerblauw katoenen pak.\""}, {"c": "sm", "t": "\"Zonder me aan te kijken droeg hij me over aan een vrouwelijke collega met een zonnebankbruin gezicht en een duifgrijze uitgroei, ze keek me niet een keer aan.\""}, {"c": "xs", "t": "\"Zodra ik mijn diploma heb ben ik weg.' Ik wreef in mijn ogen en was vergeten dat ik mascara op had, stopte mijn vinger in mijn mond en probeerde het zwart onder mijn ogen weg te poetsen.\""}, {"c": "md", "t": "\"Ze zei niets over de leverkleurige trui die mijn moeder over haar pyjama droeg, de bril schots en scheef, het dienblad met dertig geplette bitterballen.\""}, {"c": "xs", "t": "\"Het beeld wanneer ze zo afgestemd samenwerkten in die witte koksuniformen, was een mooi gezicht.\""}, {"c": "sm", "t": "\"'Je blouse zit scheef geknoopt.'\""}, {"c": "lg", "t": "\"Zij had de aantrekkingskracht van vrouwen die weten dat ze mooi zijn, en zonder zich ergens wat van aan te trekken tomatensoep maken in een wit mantelpak.\""}, {"c": "xs", "t": "\"Ik slikte en vroeg me af of dit iets met mijn make-up te maken had.\""}, {"c": "sm", "t": "\"Eerder die avond had Dolores uitgelegd dat lippenstift én mascara ordinair was.\""}, {"c": "md", "t": "\"Voordat we vertrokken, ging ik naar het toilet en smeerde nog wat mascara, oogschaduw en donkerpaarse lippenstift op.\""}, {"c": "xs", "t": "\"Ze zwaaide wild met haar armen, tuitte haar mond zoals ze geoefend had bij het Jezuskruis.\""}, {"c": "sm", "t": "\"Er was een hittegolf, Zidane had rood gekregen, YouTube bestond al een hele tijd en ik had hetzelfde kapsel als Paris Hilton.\""}, {"c": "xs", "t": "\"Ze was dun en zenuwachtig, haar nagels pasten bij de kleur van haar lippenstift.\""}, {"c": "md", "t": "\"Ik schikte de synthetische jurk die ik van mijn zus had geleend, eindelijk begon ik een vorm te krijgen – voorheen was ik mager, als een worm.\""}, {"c": "xs", "t": "\"Inmiddels had ik borsten, een rond gezicht en rolletjes wanneer ik krom zat.\""}, {"c": "sm", "t": "\"Ze rook naar de parfum van een ander.\""}, {"c": "lg", "t": "\"Van dichtbij zag ik dat haar gezicht grover was.\""}, {"c": "xs", "t": "\"Ze had haar haren op een nieuwe manier opgestoken, opzettelijk nonchalant.\""}, {"c": "md", "t": "\"Bèr keek uitdagend over haar schouder in de lens, alsof ze wist wat ze waard was, van binnenuit.\""}, {"c": "xs", "t": "\"Haar kapsel was precies hetzelfde als het nieuwe kapsel van Dolores, dezelfde draai, dezelfde losse plukjes.\""}, {"c": "sm", "t": "\"'Dames,' zei de vrouw met het lange zwarte vest dat ze telkens over haar billen trok.\""}, {"c": "xs", "t": "\"Ze droeg een shirt dat uitliep in een punt.\""}, {"c": "md", "t": "\"Dolores legde haar leren vintage tasje op het huurcontract en trok haar schoenen uit.\""}, {"c": "xs", "t": "\"Haar lippen waren ingesmeerd met vaseline en lieten een vette afdruk achter op mijn wang.\""}, {"c": "sm", "t": "\"Ze droeg een rieten hoed waar het zonlicht als kleine, scherpe diamantjes doorheen viel.\""}, {"c": "xs", "t": "\"Ze kwam naar buiten met mijn lippenstift op.\""}, {"c": "sm", "t": "\"Terwijl ze rondkeek, hing haar mond een beetje open.\""}, {"c": "md", "t": "\"Ze had een hartvormige wijnvlek op haar wang en schitterende ogen.\""}, {"c": "xs", "t": "\"Haar haren waren bijna blauw.\""}, {"c": "sm", "t": "\"Ik liep naar de badkamer en probeerde in één haal eyeliner aan te brengen.\""}, {"c": "lg", "t": "\"'Ik word gek van mijn buik.' Ze kneep in haar vel alsof ze haar huid eraf wilde trekken.\""}, {"c": "xs", "t": "\"Haar rok spande over haar billen.\""}, {"c": "sm", "t": "\"'Je hoofd blinkt zoals de appel.'\""}, {"c": "xs", "t": "\"Ik zag dat ze mascara had opgedaan.\""}, {"c": "md", "t": "\"Haar mond ging verder open, ze stak de lepel erin.\""}, {"c": "xs", "t": "\"Je mag het gewoon zeggen als je spijt hebt van je nieuwe kapsel.\""}, {"c": "sm", "t": "\"'En dan dat mondje, alsof ze een anus op haar gezicht heeft.'\""}, {"c": "xs", "t": "\"Zijn nieuwe vriendin had mooi haar en een breed hoofd.\""}, {"c": "md", "t": "\"Ze had heel sexy benen waarmee ze danste, haar gezicht bleef vanuit alle hoeken breed.\""}, {"c": "xs", "t": "\"De deken maakte mijn haren statisch en zij streek het weer glad.\""}, {"c": "lg", "t": "\"Ze vond me mager, mijn tanden te geel, mijn haar te droog en mijn wallen te donker.\""}, {"c": "xs", "t": "\"Je moet jezelf met een washandje met wat zeep wassen, beetje deodorant op doen en een lekker luchtje op spuiten.\""}, {"c": "sm", "t": "\"Ze wees met haar nicotinegele vinger naar twee appelsapflessen gewikkeld in kauwgom.\""}, {"c": "xs", "t": "\"Haar neus was rood. Af en toe viel er een lok voor haar ogen en die liet ze daar hangen.\""}, {"c": "md", "t": "\"Ik rolde wat deodorant onder mijn ene oksel, trok een mascarabrokje uit mijn wimpers, en rolde deodorant onder mijn andere oksel.\""}, {"c": "xs", "t": "\"Ze lag met haar gezicht naar de muur, haar silhouet als een omgevallen sneeuwpop.\""}, {"c": "sm", "t": "\"Ik droeg een wit hemd en geen make-up.\""}, {"c": "xs", "t": "\"Ze droeg een hoed met veren en stapte in een taxi.\""}, {"c": "md", "t": "\"Ze had patronen op haar handen getekend die doorliepen tot over het platte einde van haar vinger.\""}, {"c": "xs", "t": "\"De regen maakte onze haren plat.\""}, {"c": "sm", "t": "\"Ze droeg een dikke korte enkelsok.\""}, {"c": "xs", "t": "\"Maar aan haar ingetrokken wangen zag ik dat ze moest lachen.\""}, {"c": "lg", "t": "\"Dolores droeg haar zelfgemaakte jurk en lange handschoenen, waarvan een van de vingertoppen leeg was.\""}, {"c": "xs", "t": "\"'Ik zie het nog zo voor me,' schaterde ze, 'je voeten sleepten over de landweg, met die lange benen van jou.'\""}, {"c": "sm", "t": "\"Een trots en stoïcijns gezicht dat ze ergens moet hebben ontwikkeld om zichzelf te beschermen.\""}, {"c": "xs", "t": "\"Ik wilde iets zeggen, maar zij legde haar hand op mijn pols alsof ik heel even moest wachten met praten tot haar grap officieel was uitgewerkt en ik keek intussen naar het gaatje in haar panty.\""}, {"c": "md", "t": "\"Aan de trekken rond haar mond zag ik dat ze slecht nieuws kreeg.\""}, {"c": "xs", "t": "\"'Norbert, heb je een sigaret voor me?' Ze stak de sigaret tussen haar zompige lippen.\""}, {"c": "sm", "t": "\"Die rode lippenstift droeg.\""}, {"c": "xs", "t": "\"Daarna kreeg ik overal rode bulten, het begon in mijn nek en spreidde uit naar mijn armen en benen.\""}, {"c": "sm", "t": "\"De dokter duwde de mouwen van mijn trui omhoog en bekeek de rode bulten.\""}, {"c": "xs", "t": "\"Ze had wat mensen van de academie bij haar thuis uitgenodigd en droeg een turkooizen jurk.\""}, {"c": "md", "t": "\"Haar borsten puilden uit een beugel-bh.\""}, {"c": "xs", "t": "\"Bart was verliefd geworden op een Zweedse met een hartvormige mond.\""}, {"c": "sm", "t": "\"In de donkere hoekjes had ze gezocht naar een groot lichaam om de nacht mee door te brengen.\""}, {"c": "lg", "t": "\"Een gezicht onder de korsten, ze leek een plak cranberrypaté.\""}, {"c": "xs", "t": "\"Er zaten klitten in haar haren.\""}, {"c": "sm", "t": "\"Haar borsten lagen zwaar op haar lijf.\""}, {"c": "xs", "t": "\"Het beeld van Norberts tanden om die tepels, zoals om zijn sigaret.\""}, {"c": "md", "t": "\"Cécile, verdiept in het roeren van haar koffie, droeg een nertsmantel.\""}, {"c": "xl", "t": "\"Lelijke broek, lelijke schoenen, lelijk gezicht.\""}, {"c": "xs", "t": "\"Ze droeg een zwarte jurk met een open rug en had haar fiets mee in de trein genomen.\""}, {"c": "sm", "t": "\"Ze droeg haar duurste H&M-jurk.\""}, {"c": "xs", "t": "\"Ze sjokte wat rond door mijn ruimte en toen ze me zag keek ze me aan en ik kon me nergens achter verbergen behalve mijn make-up.\""}, {"c": "md", "t": "\"Er liep een witte streep over haar verbrande schouder.\""}, {"c": "xs", "t": "\"Haar gezicht glom als een champignon die aan het bederven is.\""}, {"c": "sm", "t": "\"Haar Vinted-broek zat losjes rond haar billen.\""}, {"c": "xs", "t": "\"Mijn haar werd voller, mijn huid was gaaf en de witte stokroos stond op het punt te bloeien.\""}, {"c": "md", "t": "\"De vrouw had lange roze nagels en zocht tussen de papieren.\""}, {"c": "xs", "t": "\"Ze had een nieuw kapsel en leek op Angela Merkel.\""}, {"c": "sm", "t": "\"Gezellige tanden, geel en smal als een geit.\""}, {"c": "md", "t": "\"Ze staarde me aan met die groene ogen, waar een zweem geel over lag, als het plakkerig waas dat een paardenbloem op je handen achterlaat.\""}, {"c": "xs", "t": "\"Donker haar, brede schouders, bruine ogen.\""}, {"c": "sm", "t": "\"Ze zag er heel gespannen uit, rolde het hoeslaken tussen haar vingers.\""}, {"c": "lg", "t": "\"Ik bekeek haar van opzij, de net iets te grote omhoog staande neus, wreed en grof.\""}, {"c": "xs", "t": "\"Ik zette mijn vinger in haar uitgedijde taille.\""}, {"c": "md", "t": "\"Ze moest haar lachen inhouden, kuiltjes verschenen als perzikinkepingen in haar wang.\""}, {"c": "xs", "t": "\"Ik zag de fijne lijntjes in haar gezicht en was het gezicht dat ze vorig jaar had alweer kwijt.\""}, {"c": "sm", "t": "\"Ik zag de wervels over haar rug lopen, als eilanden.\""}, {"c": "xs", "t": "\"Haar wangen waren rood.\""}, {"c": "md", "t": "\"'Wat een mooie blouse,' zei de buffetwandelaar voor me.\""}, {"c": "xs", "t": "\"'Dit is Prosecco,' zei ze en ze zette het glas aan haar dunne lippen.\""}, {"c": "sm", "t": "\"De maan glom in de neus van haar lakschoen.\""}, {"c": "lg", "t": "\"'Zeg, Dolores, als je zo zit, met je elleboog steunend op je been en je hoofd steunend op je hand, dan ben je heel artistiek.'\""}, {"c": "xs", "t": "\"En dan heb ik ook nog eens mijn witte broek aan.\""}, {"c": "sm", "t": "\"Mijn blouse zat scheef geknoopt.\""}, {"c": "xs", "t": "\"Er zat uitslag op mijn onderarmen, kleine rode bultjes.\""}, {"c": "md", "t": "\"Twee vrouwen op het terras zaten met gesloten ogen te zonnen.\""}, {"c": "xxl", "t": "\"Ik hield van onze anonimiteit en de witte streep die over haar verbrande schouder liep.\""}];
+
+const track = document.getElementById('track');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function titlePanel(word, opts){
+  const p = document.createElement('section');
+  p.className = 'panel title-panel';
+  let inner = '';
+  if(opts.author) inner += '<p class="author-top">Megan van Kessel</p>';
+  inner += '<h1 class="mega">'+word+'</h1>';
+  if(opts.publisher) inner += '<p class="publisher">Nijgh &amp; Van Ditmar</p>';
+  if(opts.hint) inner += '<div class="scroll-hint">scroll<span class="arrow"></span></div>';
+  p.innerHTML = inner;
+  return p;
+}
+
+track.appendChild(titlePanel('aardige', {author:true, hint:true}));
+
+const panels = [];
+QUOTES.forEach((q, i) => {
+  const sec = document.createElement('section');
+  sec.className = 'panel quote-panel';
+  const fig = document.createElement('div');
+  fig.className = 'quote ' + q.c;
+  const tokens = q.t.split(/(\s+)/);
+  const spans = [];
+  tokens.forEach(tok => {
+    if(tok.trim()===''){ fig.appendChild(document.createTextNode(tok)); return; }
+    const s = document.createElement('span');
+    s.className = 'w';
+    s.textContent = tok;
+    fig.appendChild(s);
+    spans.push(s);
+  });
+  sec.appendChild(fig);
+  const idx = document.createElement('div');
+  idx.className = 'idx';
+  idx.textContent = String(i+1).padStart(3,'0') + ' / ' + QUOTES.length;
+  sec.appendChild(idx);
+  track.appendChild(sec);
+  panels.push({el:sec, words:spans, shown:0, count:spans.length});
+});
+
+track.appendChild(titlePanel('vrouwen', {publisher:true}));
+
+const allPanels = Array.from(track.querySelectorAll('.panel'));
+
+if(reduce){
+  panels.forEach(p=>{ p.words.forEach(w=>w.classList.add('on')); p.shown=p.count; });
+}
+
+function revealPanel(p, target){
+  if(target <= p.shown) return;
+  for(let k=p.shown; k<target; k++){
+    const localDelay = (k - p.shown) * 45;
+    const span = p.words[k];
+    if(localDelay>0){ setTimeout(()=>span.classList.add('on'), localDelay); }
+    else span.classList.add('on');
+  }
+  p.shown = target;
+}
+
+let vw = window.innerWidth;
+const counter = document.getElementById('counter');
+
+function onScroll(){
+  const sl = track.scrollLeft;
+  const center = sl + vw/2;
+  const revealWindow = vw * 0.85;
+  let activeIndex = Math.round(sl / vw);
+
+  panels.forEach(p=>{
+    const el = p.el;
+    const pc = el.offsetLeft + el.offsetWidth/2;
+    const dist = pc - center;
+    let prog = 1 - (dist / revealWindow);
+    if(prog < 0) prog = 0;
+    if(prog > 1) prog = 1;
+    const target = Math.ceil(prog * p.count);
+    if(target > p.shown) revealPanel(p, target);
+  });
+
+  allPanels.forEach((el,i)=> el.classList.toggle('active', i===activeIndex));
+
+  const max = track.scrollWidth - track.clientWidth;
+  const frac = max>0 ? sl/max : 0;
+  document.getElementById('progress').style.width = (frac*100)+'%';
+  const total = QUOTES.length;
+  if(activeIndex===0){ counter.textContent=''; }
+  else if(activeIndex===allPanels.length-1){ counter.textContent='— fin —'; }
+  else { counter.textContent = String(activeIndex).padStart(2,'0')+' · '+total; }
+}
+
+let ticking=false;
+track.addEventListener('scroll', ()=>{
+  if(!ticking){ requestAnimationFrame(()=>{ onScroll(); ticking=false; }); ticking=true; }
+}, {passive:true});
+
+window.addEventListener('resize', ()=>{ vw = window.innerWidth; onScroll(); });
+
+track.addEventListener('wheel', (e)=>{
+  const dom = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+  if(Math.abs(dom) < 1) return;
+  e.preventDefault();
+  track.scrollLeft += dom;
+}, {passive:false});
+
+function go(dir){
+  const sl = track.scrollLeft;
+  const i = Math.round(sl/vw);
+  const ni = Math.min(allPanels.length-1, Math.max(0, i+dir));
+  track.scrollTo({left: ni*vw, behavior:'smooth'});
+}
+window.addEventListener('keydown', (e)=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){ e.preventDefault(); go(1); }
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); go(-1); }
+  else if(e.key==='Home'){ e.preventDefault(); track.scrollTo({left:0,behavior:'smooth'}); }
+  else if(e.key==='End'){ e.preventDefault(); track.scrollTo({left:(allPanels.length-1)*vw,behavior:'smooth'}); }
+});
+
+let tsX=0, tsY=0, tScroll=0, touching=false;
+track.addEventListener('touchstart',(e)=>{
+  if(e.touches.length!==1) return;
+  tsX=e.touches[0].clientX; tsY=e.touches[0].clientY; tScroll=track.scrollLeft; touching=true;
+},{passive:true});
+track.addEventListener('touchmove',(e)=>{
+  if(!touching||e.touches.length!==1) return;
+  const dx = tsX - e.touches[0].clientX;
+  const dy = tsY - e.touches[0].clientY;
+  if(Math.abs(dy) > Math.abs(dx)){
+    track.scrollLeft = tScroll + dy;
+  }
+},{passive:true});
+track.addEventListener('touchend',()=>{ touching=false; },{passive:true});
+
+onScroll();
+</script>
+</body>
+</html>
