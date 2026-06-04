@@ -147,7 +147,8 @@
     font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#aaa;font-style:normal;
     background-size:cover;background-position:center;position:relative;
   }
-  .m-author .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+  .m-author .photo img{display:none;height:168px;width:auto;object-fit:contain;border-radius:4px;}
+  .m-author .photo.has-img{flex:0 0 auto;width:auto;height:auto;background:none;overflow:visible;}
   .m-author .photo.has-img img{display:block;}
   .m-author .photo.has-img .ph{display:none;}
   .m-author .bio{font-size:clamp(14px,1.7vw,15.5px);line-height:1.55;color:#333;}
@@ -277,13 +278,14 @@ function onScroll(){
   let activeIndex = Math.round(sl / vw);
 
   panels.forEach(p=>{
+    if(p.done) return;
     const el = p.el;
     const pc = el.offsetLeft + el.offsetWidth/2;
     const dist = pc - center;
     let prog = 1 - (dist / revealWindow);
     if(prog < 0) prog = 0; if(prog > 1) prog = 1;
-    const target = Math.ceil(prog * p.count);
-    if(target > p.shown) revealPanel(p, target);
+    // reveal the whole sentence at once as it comes into view
+    if(prog >= 0.5){ p.words.forEach(w=>w.classList.add('on')); p.done = true; }
   });
 
   const max = track.scrollWidth - track.clientWidth;
